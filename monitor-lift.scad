@@ -1,18 +1,24 @@
 /*[Dimensions]*/
-monitor_space_height = 29.75;//[28:0.01:40]
-monitor_space_width = 45; //[44:0.01:50]
-monitor_height = 24;
+monitor_space_height = 28.75;//[28:0.01:40]
+monitor_space_width = 48; //[44:0.01:50]
+monitor_height = 25.625;
 monitor_width = 44;
-monitor_low_gap = 2.625;
-lift_width = 7;
-lift_depth = 7;
-lift_min_height = 29.75;
-lift_max_height = 57;
+monitor_low_gap = 2.75;
 total_depth = 24;//[20:32]
-back_depth = 8;//[4:16]
-base_height = 2; //[1:4]
+back_depth = 9;//[7:16]
+base_height = 2; //[1:0.1:4]
 top_middle_height = 6; //[6:12]
-air_vent_width = 14;
+lift_position = 28.75; //[28.75:0.01:57]
+
+/*[Lift Dimensions]*/
+lift_width = 7;
+lift_base_depth = 7;
+lift_base_height = 2.5;
+lift_depth = 4.5;
+lift_cross_width = 19;
+lift_cross_height = 8;
+lift_cross_base_height = 10;
+lift_cross_depth = 1.5;
 
 /*[Board Thickness]*/
 large_board = 0.75; //[0.5,0.75,1]
@@ -21,7 +27,6 @@ back_board = 0.250; //[0.125,0.25,0.375]
 
 /*[Display]*/
 imperial = true;
-label_size = 1; //[0.5,1,1.5,2]
 show_part_label = true;
 show_inside_base_back = true;
 show_vertical_walls = true;
@@ -29,6 +34,11 @@ show_front_shelves = true;
 show_base = true;
 show_back = true;
 show_air_vent = true;
+show_monitor_lift = true;
+
+/*[Hidden]*/
+label_size = 1; //[0.5,1,1.5,2]
+air_vent_width = 14;
 
 function middle_height() = monitor_space_height;
 function side_height() = middle_height() + large_board*2;
@@ -39,6 +49,7 @@ function total_width() = monitor_space_width + storage_width() * 2;
 function base_front_width() = total_width()/2 - air_vent_width/2;
 function base_floor() = base_height + large_board;
 function top_shelf_floor() = monitor_space_height + base_floor() - top_middle_height;
+function monitor_floor() = base_floor() + monitor_low_gap + lift_position - monitor_space_height;
 function scale_factor() = imperial ? 1 : 25.4;
 scale_factor=scale_factor();
 function unit() = imperial ? chr(34) : str("mm");
@@ -219,9 +230,28 @@ module back_board() {
     part = "P";
     desc = "Back Board";
     x = total_width() + large_board*2;
-    y = monitor_space_height + large_board + small_board;
+    y = monitor_space_height + large_board;
     c = "#4E6483";
     back_board_part(part, desc, x, y, c);
+}
+
+module monitor() {
+    translate([storage_width() + large_board + (monitor_space_width - monitor_width)/2, lift_depth + lift_cross_depth + 1, monitor_floor()])
+    rotate([90, 0, 0])
+    color("black")
+        cube([monitor_width, monitor_height, 1]);
+}
+
+module lift() {
+    translate([storage_width() + large_board + (monitor_space_width - lift_width)/2, 0, base_floor()])
+    color("#CCD3A0")
+        cube([lift_width, lift_base_depth, lift_base_height]);
+    
+    translate([storage_width() + large_board + (monitor_space_width - lift_width)/2, 0, base_floor() + lift_base_height])
+        cube([lift_width, lift_depth, lift_position - lift_base_height]);
+    
+    translate([storage_width() + large_board + (monitor_space_width - lift_cross_width)/2, lift_depth, monitor_floor() + lift_cross_height])
+        cube([lift_cross_width, lift_cross_depth, lift_cross_height]);
 }
 
 module front_shelves() {
@@ -248,37 +278,37 @@ module front_shelves() {
 }
 
 module inside_base_back() {
-    translate([storage_width() + large_board, back_depth, base_height + large_board])
+    translate([storage_width() + large_board, back_depth, base_floor()])
     rotate([90, 0, 0])
         middle_backboard();
     
     translate([large_board, 0, base_height])
         bottom();
     
-    translate([storage_width() + large_board, back_depth, base_height + large_board])
+    translate([storage_width() + large_board, back_depth, base_floor()])
         bottom_shelf_middle();
 
-    translate([large_board, 0, base_height + large_board])
+    translate([large_board, 0, base_floor()])
     bottom_shelf_side();
 
-    translate([monitor_space_width + storage_width() + large_board + large_board, 0, base_height + large_board])
+    translate([monitor_space_width + storage_width() + large_board + large_board, 0, base_floor()])
     bottom_shelf_side();
 }
 
 module vertical_walls() {
-    translate([storage_width(), 0, base_height + large_board])
+    translate([storage_width(), 0, base_floor()])
     rotate([90, 0, 90])
         middle_side_back_wall();
 
-    translate([storage_width() + monitor_space_width + large_board, 0, base_height + large_board])
+    translate([storage_width() + monitor_space_width + large_board, 0, base_floor()])
     rotate([90, 0, 90])
         middle_side_back_wall();
     
-    translate([storage_width(), back_depth, base_height + large_board])
+    translate([storage_width(), back_depth, base_floor()])
     rotate([90, 0, 90])
         middle_side_front_wall();
 
-    translate([storage_width() + monitor_space_width + large_board, back_depth, base_height + large_board])
+    translate([storage_width() + monitor_space_width + large_board, back_depth, base_floor()])
     rotate([90, 0, 90])
         middle_side_front_wall();
     
@@ -346,4 +376,8 @@ scale([scale_factor, scale_factor, scale_factor]) {
     if(show_front_shelves) front_shelves();
     if(show_base) base();
     if(show_back) back();
+    if(show_monitor_lift) {
+        monitor();
+        lift();
+    }
 }
