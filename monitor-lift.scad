@@ -68,7 +68,7 @@ unit=unit();
 
 module dimensions() {
     x = large_board*2 + wood_board*2 + total_width();
-    y = total_depth + back_board + wood_board*2;
+    y = total_depth + back_board + wood_board;
     z = base_height + large_board*2 + lift_min_height;
 
     echo(str("Total Dimesions: ",x*scale_factor,unit," x ",y*scale_factor,unit," x ",z*scale_factor,unit));
@@ -345,7 +345,7 @@ module top_front() {
     part = "W";
     desc = "Top Front";
     x = top_width();
-    y = shelf_depth() + small_board + wood_board;
+    y = shelf_depth() + small_board;
     c = top_color;
     wood_board_part(part, desc, x, y, c);
 }
@@ -380,7 +380,7 @@ module top_front_trim() {
 module top_side_trim() {
     part = "Z";
     desc = "Top Side Trim";
-    x = total_depth + wood_board;
+    x = total_depth;
     y = frame_part_width;
     c = top_trim_color;
     wood_board_part(part, desc, x, y, c);
@@ -539,7 +539,7 @@ module top() {
     translate([storage_width() + large_board, 0, top_middle_floor()])
         top_middle();
     
-    translate([-wood_board, total_depth + wood_board*2, top_floor() - small_board])
+    translate([-wood_board, total_depth + wood_board, top_floor() - small_board])
     rotate([90, 0, 0])
         top_front_trim();
     
